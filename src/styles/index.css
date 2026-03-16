@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f3f4f6;
+  --bg-tertiary: #e5e7eb;
+  --text-primary: #1a1a2e;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  --border: #d1d5db;
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --success: #22c55e;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --node-bg: #ffffff;
+  --node-border: #d1d5db;
+  --panel-bg: #ffffff;
+}
+
+.dark {
+  --bg-primary: #0f0f23;
+  --bg-secondary: #1a1a2e;
+  --bg-tertiary: #2a2a3e;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0b0;
+  --text-muted: #6b6b80;
+  --border: #3a3a4e;
+  --accent: #818cf8;
+  --accent-hover: #6366f1;
+  --success: #4ade80;
+  --error: #f87171;
+  --warning: #fbbf24;
+  --node-bg: #1a1a2e;
+  --node-border: #3a3a4e;
+  --panel-bg: #1a1a2e;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* ReactFlow overrides */
+.react-flow__node {
+  background: var(--node-bg) !important;
+  border-color: var(--node-border) !important;
+  color: var(--text-primary) !important;
+}
+.react-flow__edge-path {
+  stroke: var(--border) !important;
+}
+.react-flow__background {
+  background-color: var(--bg-primary) !important;
+}

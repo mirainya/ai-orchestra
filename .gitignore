@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Rust
+src-tauri/target/
+src-tauri/gen/schemas
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Environment & secrets
+.env
+.env.*
+
+# Temp
+.temp/
+
+# Claude Code
+.claude/

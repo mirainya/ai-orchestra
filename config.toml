@@ -1,0 +1,36 @@
+[[workers]]
+name = "claude-planner"
+cli_type = "claude_cli"
+mode = "cli"
+role = "planner"
+skills = [
+    "planning",
+    "analysis",
+]
+cli_path = "claude"
+extra_args = [
+    "--output-format",
+    "json",
+]
+
+[[workers]]
+name = "codex-1"
+cli_type = "codex_cli"
+mode = "cli"
+role = "executor"
+skills = [
+    "coding",
+    "review",
+]
+cli_path = "codex"
+extra_args = [
+    "--approval-mode",
+    "full-auto",
+    "-q",
+]
+
+[execution]
+task_timeout_secs = 300
+max_retries = 1
+retry_delay_secs = 2
+planner_timeout_secs = 120
