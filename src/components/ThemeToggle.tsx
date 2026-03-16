@@ -1,3 +1,4 @@
+import { Sun, Moon } from "lucide-react";
 import { useThemeStore } from "../stores/theme";
 
 export function ThemeToggle() {
@@ -12,7 +13,7 @@ export function ThemeToggle() {
       }}
       title={dark ? "切换到浅色模式" : "切换到深色模式"}
     >
-      {dark ? "\u2600\uFE0F" : "\uD83C\uDF19"}
+      {dark ? <Sun size={16} /> : <Moon size={16} />}
     </button>
   );
 }

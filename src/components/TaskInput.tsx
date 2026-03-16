@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
+import { FolderOpen, X, Sparkles, Loader2 } from "lucide-react";
 import { useOrchestratorStore } from "../stores/orchestrator";
 
 export function TaskInput() {
@@ -74,18 +75,7 @@ export function TaskInput() {
             border: "1px solid var(--border)",
           }}
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-          </svg>
+          <FolderOpen size={16} />
           {dirLabel ?? "工作目录"}
         </button>
         {workingDir && (
@@ -100,7 +90,7 @@ export function TaskInput() {
             }}
             title="清除工作目录"
           >
-            ✕
+            <X size={14} />
           </button>
         )}
         <input
@@ -125,7 +115,7 @@ export function TaskInput() {
             color: "#fff",
           }}
         >
-          {isPlanning ? "规划中..." : isRunning ? "执行中..." : "规划"}
+          {isPlanning ? <Loader2 size={16} className="animate-spin" /> : isRunning ? "执行中..." : <><Sparkles size={16} /> 规划</>}
         </button>
       </div>
     </div>

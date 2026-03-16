@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { X, Send } from "lucide-react";
 import { useOrchestratorStore } from "../stores/orchestrator";
 
 const statusLabel: Record<string, string> = {
@@ -69,7 +70,7 @@ export function TaskDetail() {
             className="text-xs px-2 py-0.5 rounded"
             style={{ background: "var(--bg-tertiary)", color: "var(--text-secondary)" }}
           >
-            关闭
+            <X size={12} />
           </button>
         </div>
 
@@ -162,7 +163,7 @@ export function TaskDetail() {
               {chatMessages.map((msg, i) => (
                 <div
                   key={i}
-                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
                 >
                   <div
                     className="max-w-[90%] px-2 py-1.5 rounded text-xs whitespace-pre-wrap"
@@ -170,6 +171,7 @@ export function TaskDetail() {
                       background: msg.role === "user" ? "var(--accent)" : "var(--bg-tertiary)",
                       color: msg.role === "user" ? "#fff" : "var(--text-primary)",
                       wordBreak: "break-word",
+                      boxShadow: "var(--shadow-sm)",
                     }}
                   >
                     {msg.content}
@@ -177,12 +179,14 @@ export function TaskDetail() {
                 </div>
               ))}
               {isSending && (
-                <div className="flex justify-start">
+                <div className="flex justify-start animate-fade-in">
                   <div
-                    className="px-2 py-1.5 rounded text-xs"
+                    className="px-2 py-1.5 rounded text-xs flex items-center gap-1"
                     style={{ background: "var(--bg-tertiary)", color: "var(--text-muted)" }}
                   >
-                    思考中...
+                    <span className="thinking-dot" style={{ animationDelay: "0ms" }} />
+                    <span className="thinking-dot" style={{ animationDelay: "160ms" }} />
+                    <span className="thinking-dot" style={{ animationDelay: "320ms" }} />
                   </div>
                 </div>
               )}
@@ -214,10 +218,10 @@ export function TaskDetail() {
           <button
             onClick={handleSendMessage}
             disabled={isSending || !chatInput.trim()}
-            className="px-3 py-1.5 rounded text-xs disabled:opacity-50"
+            className="px-3 py-1.5 rounded text-xs disabled:opacity-50 flex items-center gap-1"
             style={{ background: "var(--accent)", color: "#fff" }}
           >
-            发送
+            <Send size={12} />
           </button>
         </div>
       )}

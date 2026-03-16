@@ -3,6 +3,7 @@ import { listen } from "@tauri-apps/api/event";
 import { useThemeStore } from "./stores/theme";
 import { useOrchestratorStore, type SubTask } from "./stores/orchestrator";
 import { Layout } from "./components/Layout";
+import { ToastContainer } from "./components/Toast";
 
 export default function App() {
   const init = useThemeStore((s) => s.init);
@@ -16,6 +17,7 @@ export default function App() {
     appendPlannerMessage,
     setPlannerStatus,
     appendTaskMessage,
+    addToast,
   } = useOrchestratorStore();
 
   useEffect(() => init(), [init]);
@@ -37,6 +39,7 @@ export default function App() {
           const tasks = plan.tasks.map((t) => ({ ...t, status: "pending" as const }));
           setTasks(tasks);
           appendOutput("planner", `Plan ready: ${tasks.length} tasks`, "success");
+          addToast("info", `计划就绪：${tasks.length} 个任务`);
           break;
         }
         case "task_status": {
@@ -51,11 +54,17 @@ export default function App() {
             : status === "failed" ? "error" as const
             : "info" as const;
           appendOutput(taskId, `Status: ${status}`, level);
+          if (status === "completed") {
+            addToast("success", `任务 ${taskId} 已完成`);
+          } else if (status === "failed") {
+            addToast("error", `任务 ${taskId} 执行失败`);
+          }
           break;
         }
         case "all_done":
           setRunning(false);
           appendOutput("system", "All tasks completed", "success");
+          addToast("success", "所有任务已完成");
           break;
       }
     }).then((u) => unlisten.push(u));
@@ -120,7 +129,13 @@ export default function App() {
     appendPlannerMessage,
     setPlannerStatus,
     appendTaskMessage,
+    addToast,
   ]);
 
-  return <Layout />;
+  return (
+    <>
+      <Layout />
+      <ToastContainer />
+    </>
+  );
 }

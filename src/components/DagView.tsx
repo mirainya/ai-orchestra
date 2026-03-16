@@ -10,6 +10,7 @@ import {
   Position,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { Circle, Loader2, CheckCircle2, XCircle, Workflow } from "lucide-react";
 import { useOrchestratorStore, type SubTask, type TaskStatus } from "../stores/orchestrator";
 
 const statusColor: Record<TaskStatus, string> = {
@@ -19,11 +20,11 @@ const statusColor: Record<TaskStatus, string> = {
   failed: "var(--error)",
 };
 
-const statusIcon: Record<TaskStatus, string> = {
-  pending: "\u25cb",
-  running: "\u25d4",
-  completed: "\u2714",
-  failed: "\u2718",
+const statusIcon: Record<TaskStatus, React.ReactNode> = {
+  pending: <Circle size={13} />,
+  running: <Loader2 size={13} className="animate-spin" />,
+  completed: <CheckCircle2 size={13} />,
+  failed: <XCircle size={13} />,
 };
 
 const NODE_W = 200;
@@ -107,7 +108,7 @@ export function DagView() {
           label: (
             <div style={{ padding: "6px 8px", minWidth: 160 }}>
               <div className="flex items-center gap-1.5" style={{ marginBottom: 4 }}>
-                <span style={{ color: statusColor[t.status], fontSize: 13 }}>
+                <span style={{ color: statusColor[t.status] }}>
                   {statusIcon[t.status]}
                 </span>
                 <span
@@ -207,13 +208,25 @@ export function DagView() {
       >
         {isPlanning ? (
           <>
-            <div className="animate-spin" style={{ fontSize: 24 }}>{"\u2699"}</div>
+            <Loader2 size={32} className="animate-spin" style={{ opacity: 0.5 }} />
             <div style={{ fontSize: 14 }}>正在规划任务...</div>
           </>
         ) : (
           <>
-            <div style={{ fontSize: 32, opacity: 0.3 }}>{"\u25c7"}</div>
-            <div style={{ fontSize: 14 }}>在上方输入任务以生成执行 DAG</div>
+            <div
+              style={{
+                padding: 24,
+                border: "2px dashed var(--border)",
+                borderRadius: "var(--radius-lg)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 12,
+              }}
+            >
+              <Workflow size={36} style={{ opacity: 0.3 }} />
+              <div style={{ fontSize: 14 }}>在上方输入任务以生成执行 DAG</div>
+            </div>
           </>
         )}
       </div>

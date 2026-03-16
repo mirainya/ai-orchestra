@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { RefreshCw, Trash2, Clock } from "lucide-react";
 
 interface HistorySummary {
   id: string;
@@ -61,7 +62,7 @@ export function HistoryPanel() {
           className="text-xs px-2 py-0.5 rounded"
           style={{ background: "var(--bg-tertiary)", color: "var(--text-secondary)" }}
         >
-          刷新
+          <RefreshCw size={12} />
         </button>
       </div>
       {entries.map((e) => {
@@ -70,7 +71,13 @@ export function HistoryPanel() {
           <div
             key={e.id}
             className="rounded-lg p-3 space-y-1"
-            style={{ background: "var(--bg-tertiary)" }}
+            style={{
+              background: "var(--bg-tertiary)",
+              boxShadow: "var(--shadow-sm)",
+              transition: "box-shadow var(--transition-normal)",
+            }}
+            onMouseEnter={(ev) => (ev.currentTarget.style.boxShadow = "var(--shadow-md)")}
+            onMouseLeave={(ev) => (ev.currentTarget.style.boxShadow = "var(--shadow-sm)")}
           >
             <div className="flex items-center justify-between">
               <span
@@ -84,7 +91,7 @@ export function HistoryPanel() {
                 className="text-xs px-1.5 py-0.5 rounded opacity-60 hover:opacity-100"
                 style={{ color: "var(--error)" }}
               >
-                删除
+                <Trash2 size={12} />
               </button>
             </div>
             <div
@@ -100,7 +107,7 @@ export function HistoryPanel() {
               {e.goal}
             </div>
             <div className="flex items-center gap-2 text-xs" style={{ color: "var(--text-muted)" }}>
-              <span>{e.task_count} 个任务</span>
+              <span className="flex items-center gap-1"><Clock size={10} />{e.task_count} 个任务</span>
               <span>{e.started_at}</span>
             </div>
           </div>

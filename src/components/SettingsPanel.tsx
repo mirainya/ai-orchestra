@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { X, Save } from "lucide-react";
 
 interface WorkerConfig {
   name: string;
@@ -119,9 +120,16 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
-        <div className="rounded-xl p-6" style={{ background: "var(--bg-secondary)", color: "var(--text-muted)" }}>
-          加载中...
+      <div className="fixed inset-0 z-50 flex justify-end" style={{ background: "rgba(0,0,0,0.3)" }}>
+        <div
+          className="h-full flex items-center justify-center"
+          style={{
+            background: "var(--bg-secondary)",
+            width: 420,
+            animation: "slide-in-right 250ms ease-out",
+          }}
+        >
+          <span style={{ color: "var(--text-muted)" }}>加载中...</span>
         </div>
       </div>
     );
@@ -130,14 +138,19 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
   if (!config) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
+    <div
+      className="fixed inset-0 z-50 flex justify-end"
+      style={{ background: "rgba(0,0,0,0.3)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
       <div
-        className="rounded-xl flex flex-col"
+        className="h-full flex flex-col"
         style={{
           background: "var(--bg-secondary)",
-          width: 640,
-          maxHeight: "85vh",
-          border: "1px solid var(--border)",
+          width: 420,
+          borderLeft: "1px solid var(--border)",
+          boxShadow: "var(--shadow-lg)",
+          animation: "slide-in-right 250ms ease-out",
         }}
       >
         {/* Header */}
@@ -153,18 +166,19 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
               <button
                 onClick={save}
                 disabled={saving}
-                className="text-xs px-3 py-1.5 rounded font-medium disabled:opacity-50"
+                className="text-xs px-3 py-1.5 rounded font-medium disabled:opacity-50 flex items-center gap-1"
                 style={{ background: "var(--accent)", color: "#fff" }}
               >
+                <Save size={12} />
                 {saving ? "保存中..." : "保存"}
               </button>
             )}
             <button
               onClick={onClose}
-              className="text-xs px-3 py-1.5 rounded"
+              className="p-1.5 rounded"
               style={{ background: "var(--bg-tertiary)", color: "var(--text-secondary)" }}
             >
-              关闭
+              <X size={14} />
             </button>
           </div>
         </div>

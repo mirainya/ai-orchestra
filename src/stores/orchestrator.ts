@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { ToastItem } from "../components/Toast";
 
 export type TaskStatus = "pending" | "running" | "completed" | "failed";
 export type CliType = "claude" | "codex" | "glm" | "claude_cli" | "codex_cli" | "glm_cli" | "openai" | "anthropic";
@@ -56,6 +57,9 @@ interface OrchestratorState {
   // Task chat state
   taskSessions: Record<string, ChatMessage[]>;
 
+  // Toast state
+  toasts: ToastItem[];
+
   setGoal: (goal: string) => void;
   setTasks: (tasks: SubTask[]) => void;
   updateTask: (id: string, patch: Partial<SubTask>) => void;
@@ -74,6 +78,11 @@ interface OrchestratorState {
   // Task chat actions
   appendTaskMessage: (taskId: string, msg: ChatMessage) => void;
 
+  // Toast actions
+  addToast: (type: ToastItem["type"], message: string) => void;
+  removeToast: (id: number) => void;
+  markToastExiting: (id: number) => void;
+
   reset: () => void;
   clearOutput: () => void;
 }
@@ -91,6 +100,7 @@ export const useOrchestratorStore = create<OrchestratorState>((set) => ({
   plannerMessages: [],
   plannerStatus: "idle",
   taskSessions: {},
+  toasts: [],
 
   setGoal: (goal) => set({ goal }),
   setTasks: (tasks) => set({ tasks }),
@@ -124,6 +134,19 @@ export const useOrchestratorStore = create<OrchestratorState>((set) => ({
         ...s.taskSessions,
         [taskId]: [...(s.taskSessions[taskId] ?? []), msg],
       },
+    })),
+
+  addToast: (type, message) =>
+    set((s) => ({
+      toasts: [...s.toasts, { id: Date.now(), type, message }],
+    })),
+  removeToast: (id) =>
+    set((s) => ({
+      toasts: s.toasts.filter((t) => t.id !== id),
+    })),
+  markToastExiting: (id) =>
+    set((s) => ({
+      toasts: s.toasts.map((t) => (t.id === id ? { ...t, exiting: true } : t)),
     })),
 
   reset: () =>

@@ -1,3 +1,4 @@
+import { Bot } from "lucide-react";
 import { useOrchestratorStore } from "../stores/orchestrator";
 
 const roleLabel: Record<string, string> = {
@@ -26,10 +27,17 @@ export function WorkerPanel() {
           <div
             key={w.name}
             className="px-3 py-2 rounded-lg space-y-1.5"
-            style={{ background: "var(--bg-tertiary)" }}
+            style={{
+              background: "var(--bg-tertiary)",
+              boxShadow: "var(--shadow-sm)",
+              transition: "box-shadow var(--transition-normal)",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "var(--shadow-md)")}
+            onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "var(--shadow-sm)")}
           >
             <div className="flex items-center justify-between">
-              <div className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+              <div className="text-sm font-medium flex items-center gap-1.5" style={{ color: "var(--text-primary)" }}>
+                <Bot size={14} style={{ color: "var(--accent)" }} />
                 {w.name}
               </div>
               <span

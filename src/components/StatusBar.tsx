@@ -24,6 +24,14 @@ export function StatusBar() {
 
   const progressPct = total > 0 ? ((completed + failed) / total) * 100 : 0;
 
+  const dotColor = isPlanning || isRunning
+    ? "var(--warning)"
+    : total > 0 && failed === 0 && completed === total
+      ? "var(--success)"
+      : failed > 0
+        ? "var(--error)"
+        : "var(--text-muted)";
+
   return (
     <div
       className="flex items-center justify-between px-5 py-1.5 text-xs shrink-0"
@@ -38,8 +46,9 @@ export function StatusBar() {
           <span
             className="w-2 h-2 rounded-full inline-block"
             style={{
-              background: isPlanning || isRunning ? "var(--warning)" : total > 0 && failed === 0 && completed === total ? "var(--success)" : failed > 0 ? "var(--error)" : "var(--text-muted)",
-              animation: isPlanning || isRunning ? "pulse 1.5s infinite" : "none",
+              background: dotColor,
+              animation: isPlanning || isRunning ? "pulse-glow 1.5s infinite" : "none",
+              boxShadow: isPlanning || isRunning ? `0 0 6px ${dotColor}` : "none",
             }}
           />
           {status}

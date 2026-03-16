@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { ArrowDownToLine, ArrowDown, Trash2 } from "lucide-react";
 import { useOrchestratorStore, type OutputLine } from "../stores/orchestrator";
 
 function formatTime(ts: number) {
@@ -37,7 +38,7 @@ export function OutputPanel() {
   return (
     <div
       className="rounded-xl flex flex-col"
-      style={{ background: "var(--bg-secondary)", minHeight: 160, maxHeight: 280 }}
+      style={{ background: "var(--bg-secondary)", minHeight: 160, maxHeight: 280, boxShadow: "var(--shadow-sm)" }}
     >
       {/* Header */}
       <div
@@ -81,7 +82,7 @@ export function OutputPanel() {
             }}
             title={autoScroll ? "自动滚动 开" : "自动滚动 关"}
           >
-            {autoScroll ? "\u2193 自动" : "\u2193 手动"}
+            {autoScroll ? <ArrowDownToLine size={13} /> : <ArrowDown size={13} />}
           </button>
           <button
             onClick={clearOutput}
@@ -92,7 +93,7 @@ export function OutputPanel() {
               border: "1px solid var(--border)",
             }}
           >
-            清空
+            <Trash2 size={13} />
           </button>
         </div>
       </div>

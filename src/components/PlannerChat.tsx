@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { Send, CheckCircle } from "lucide-react";
 import { useOrchestratorStore } from "../stores/orchestrator";
 
 export function PlannerChat() {
@@ -65,7 +66,7 @@ export function PlannerChat() {
         {plannerMessages.map((msg, i) => (
           <div
             key={i}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} animate-fade-in`}
           >
             <div
               className="max-w-[80%] px-3 py-2 rounded-lg text-sm whitespace-pre-wrap"
@@ -73,6 +74,7 @@ export function PlannerChat() {
                 background:
                   msg.role === "user" ? "var(--accent)" : "var(--bg-tertiary)",
                 color: msg.role === "user" ? "#fff" : "var(--text-primary)",
+                boxShadow: "var(--shadow-sm)",
               }}
             >
               {msg.content}
@@ -80,15 +82,18 @@ export function PlannerChat() {
           </div>
         ))}
         {plannerStatus === "thinking" && (
-          <div className="flex justify-start">
+          <div className="flex justify-start animate-fade-in">
             <div
-              className="px-3 py-2 rounded-lg text-sm"
+              className="px-3 py-2 rounded-lg text-sm flex items-center gap-1"
               style={{
                 background: "var(--bg-tertiary)",
                 color: "var(--text-muted)",
+                boxShadow: "var(--shadow-sm)",
               }}
             >
-              思考中...
+              <span className="thinking-dot" style={{ animationDelay: "0ms" }} />
+              <span className="thinking-dot" style={{ animationDelay: "160ms" }} />
+              <span className="thinking-dot" style={{ animationDelay: "320ms" }} />
             </div>
           </div>
         )}
@@ -103,9 +108,10 @@ export function PlannerChat() {
         >
           <button
             onClick={handleApprove}
-            className="px-4 py-2 rounded-lg font-medium text-sm"
+            className="px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-1.5"
             style={{ background: "var(--success)", color: "#fff" }}
           >
+            <CheckCircle size={14} />
             批准计划
           </button>
           <span
@@ -142,9 +148,10 @@ export function PlannerChat() {
         <button
           onClick={handleSend}
           disabled={busy || !input.trim()}
-          className="px-4 py-2 rounded-lg text-sm disabled:opacity-50"
+          className="px-4 py-2 rounded-lg text-sm disabled:opacity-50 flex items-center gap-1.5"
           style={{ background: "var(--accent)", color: "#fff" }}
         >
+          <Send size={14} />
           发送
         </button>
       </div>
