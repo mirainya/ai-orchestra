@@ -9,6 +9,24 @@ pub mod parser;
 #[cfg(test)]
 mod integration_test;
 
+/// Extract the actual text result from Claude CLI JSON output.
+/// Claude CLI with `--output-format json` outputs JSON like:
+///   {"type":"result","result":"actual text here",...}
+/// Sometimes it outputs multiple lines (duplicates). We take the first valid one.
+fn extract_cli_result(raw: &str) -> String {
+    for line in raw.lines() {
+        let line = line.trim();
+        if line.is_empty() { continue; }
+        if let Ok(v) = serde_json::from_str::<serde_json::Value>(line) {
+            if let Some(result) = v.get("result").and_then(|r| r.as_str()) {
+                return result.to_string();
+            }
+        }
+    }
+    // Fallback: return raw output
+    raw.to_string()
+}
+
 /// Build the planner system prompt dynamically based on available executor workers.
 pub(crate) fn build_planner_system_prompt(executors: &[&WorkerConfig]) -> String {
     // Build worker description lines
@@ -106,18 +124,23 @@ async fn generate_plan_cli(planner: &WorkerConfig, prompt: &str, working_dir: Op
     for arg in &planner.extra_args {
         cmd.arg(arg);
     }
-
+    cmd.stdin(std::process::Stdio::null());
     cmd.stdout(std::process::Stdio::piped());
     cmd.stderr(std::process::Stdio::piped());
 
-    let output = cmd.output().await?;
+    let output = cmd.output().await
+        .map_err(|e| anyhow::anyhow!("Failed to spawn planner CLI '{}': {}", cli_path, e))?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
 
     if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        anyhow::bail!("Planner CLI failed: {}", stderr);
+        let detail = if !stderr.is_empty() { stderr.to_string() }
+            else if !stdout.is_empty() { format!("(stdout) {}", &stdout[..stdout.len().min(500)]) }
+            else { format!("exit code: {:?}", output.status.code()) };
+        anyhow::bail!("Planner CLI failed: {}", detail);
     }
 
-    let stdout = String::from_utf8(output.stdout)?;
     parser::parse_plan(&stdout)
 }
 
@@ -233,17 +256,24 @@ async fn chat_plan_cli(
     for arg in &planner.extra_args {
         cmd.arg(arg);
     }
+    cmd.stdin(std::process::Stdio::null());
     cmd.stdout(std::process::Stdio::piped());
     cmd.stderr(std::process::Stdio::piped());
 
-    let output = cmd.output().await?;
+    let output = cmd.output().await
+        .map_err(|e| anyhow::anyhow!("Failed to spawn planner CLI '{}': {}", cli_path, e))?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
 
     if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        anyhow::bail!("Planner CLI failed: {}", stderr);
+        let detail = if !stderr.is_empty() { stderr.to_string() }
+            else if !stdout.is_empty() { format!("(stdout) {}", &stdout[..stdout.len().min(500)]) }
+            else { format!("exit code: {:?}", output.status.code()) };
+        anyhow::bail!("Planner CLI failed: {}", detail);
     }
 
-    Ok(String::from_utf8(output.stdout)?)
+    Ok(extract_cli_result(&stdout))
 }
 
 /// API mode: send messages array directly

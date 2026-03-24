@@ -117,9 +117,9 @@ export function Layout() {
       {/* Main Area */}
       <div className="flex-1 flex min-h-0">
         {/* Left: DAG + Planner Chat */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 min-h-0">
           {/* DAG View */}
-          <div className={plannerSessionId ? "flex-1 min-h-0" : "flex-1"}>
+          <div className={plannerSessionId ? "flex-1 min-h-0 overflow-hidden" : "flex-1"}>
             <DagView />
           </div>
           {/* Planner Chat (when active) */}

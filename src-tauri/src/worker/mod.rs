@@ -44,19 +44,124 @@ pub trait CliAdapter: Send + Sync {
 
 /// Helper: create a Command for a CLI path, handling Windows .cmd wrappers
 pub fn spawn_cli(path: &str, working_dir: Option<&str>) -> tokio::process::Command {
+    let mut cmd = resolve_and_build_command(path);
+
+    // Clear env vars that prevent nested CLI sessions
+    cmd.env_remove("CLAUDECODE");
+
+    // On Windows, ensure Claude CLI can find git-bash
     #[cfg(windows)]
-    let mut cmd = {
-        let mut cmd = tokio::process::Command::new("cmd");
-        cmd.args(["/c", path]);
-        cmd
-    };
-    #[cfg(not(windows))]
-    let mut cmd = tokio::process::Command::new(path);
+    {
+        if std::env::var("CLAUDE_CODE_GIT_BASH_PATH").is_err() {
+            if let Some(bash) = find_git_bash() {
+                cmd.env("CLAUDE_CODE_GIT_BASH_PATH", bash);
+            }
+        }
+    }
 
     if let Some(dir) = working_dir {
         cmd.current_dir(dir);
     }
     cmd
+}
+
+/// Find git-bash on Windows by searching PATH for bash.exe
+#[cfg(windows)]
+fn find_git_bash() -> Option<String> {
+    if let Ok(paths) = std::env::var("PATH") {
+        for dir in std::env::split_paths(&paths) {
+            let candidate = dir.join("bash.exe");
+            if candidate.exists() {
+                return Some(candidate.to_string_lossy().to_string());
+            }
+        }
+    }
+    // Common install locations
+    for path in &[
+        r"C:\Program Files\Git\bin\bash.exe",
+        r"C:\Program Files (x86)\Git\bin\bash.exe",
+    ] {
+        if std::path::Path::new(path).exists() {
+            return Some(path.to_string());
+        }
+    }
+    None
+}
+
+/// On Windows, .cmd files must go through `cmd /c` which mangles special chars
+/// ({, }, &, |, etc.) in arguments. Instead, parse the .cmd to find the actual
+/// node script and invoke `node <script>` directly.
+fn resolve_and_build_command(path: &str) -> tokio::process::Command {
+    #[cfg(windows)]
+    {
+        if let Some((node, script)) = find_cmd_node_script(path) {
+            let mut cmd = tokio::process::Command::new(node);
+            cmd.arg(script);
+            return cmd;
+        }
+        // Fallback: use cmd /c
+        let mut cmd = tokio::process::Command::new("cmd");
+        cmd.args(["/c", path]);
+        cmd
+    }
+    #[cfg(not(windows))]
+    {
+        tokio::process::Command::new(path)
+    }
+}
+
+/// Parse a .cmd wrapper to extract the node executable and JS script path.
+/// Returns Some((node_path, script_path)) if found.
+#[cfg(windows)]
+fn find_cmd_node_script(name: &str) -> Option<(String, String)> {
+    use std::path::Path;
+
+    // Find the .cmd file in PATH
+    let cmd_path = {
+        let p = Path::new(name);
+        if p.extension().is_some() && p.exists() {
+            Some(p.to_path_buf())
+        } else if let Ok(paths) = std::env::var("PATH") {
+            std::env::split_paths(&paths)
+                .map(|dir| dir.join(format!("{}.cmd", name)))
+                .find(|c| c.exists())
+        } else {
+            None
+        }
+    }?;
+
+    let content = std::fs::read_to_string(&cmd_path).ok()?;
+    let cmd_dir = cmd_path.parent()?;
+
+    // Look for pattern: "%_prog%" "%dp0%\path\to\script.js" %*
+    // or: "%_prog%" "%dp0%/path/to/script.js" %*
+    for line in content.lines() {
+        let line = line.trim();
+        if line.contains("%_prog%") && line.contains(".js") {
+            // Extract the .js path: find %dp0%\...\something.js
+            if let Some(start) = line.find("%dp0%") {
+                let after = &line[start + 5..]; // skip %dp0%
+                let after = after.trim_start_matches('\\').trim_start_matches('/');
+                // Find end: either " or space before %*
+                let end = after.find('"')
+                    .or_else(|| after.find(" %*"))
+                    .unwrap_or(after.len());
+                let rel_script = &after[..end];
+                let script_path = cmd_dir.join(rel_script);
+                if script_path.exists() {
+                    // Determine node path
+                    let node_exe = cmd_dir.join("node.exe");
+                    let node = if node_exe.exists() {
+                        node_exe.to_string_lossy().to_string()
+                    } else {
+                        "node".to_string()
+                    };
+                    return Some((node, script_path.to_string_lossy().to_string()));
+                }
+            }
+        }
+    }
+    None
 }
 
 /// Helper: build the full prompt with optional context

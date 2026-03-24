@@ -15,7 +15,7 @@ extra_args = [
 
 [[workers]]
 name = "codex-1"
-cli_type = "codex_cli"
+cli_type = "claude_cli"
 mode = "cli"
 role = "executor"
 skills = [
@@ -28,6 +28,15 @@ extra_args = [
     "full-auto",
     "-q",
 ]
+
+[[workers]]
+name = "worker-3"
+cli_type = "claude_cli"
+mode = "cli"
+role = "executor"
+skills = ["coding"]
+cli_path = "codex"
+extra_args = []
 
 [execution]
 task_timeout_secs = 300

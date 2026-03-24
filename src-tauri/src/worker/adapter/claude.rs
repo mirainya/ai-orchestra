@@ -6,6 +6,7 @@ use crate::worker::{CliAdapter, TaskOutput, OutputLine, build_prompt, run_stream
 
 pub struct ClaudeAdapter {
     name: String,
+    cli_type: String,
     cli_path: String,
     extra_args: Vec<String>,
 }
@@ -14,6 +15,7 @@ impl ClaudeAdapter {
     pub fn new(config: &WorkerConfig) -> Self {
         Self {
             name: config.name.clone(),
+            cli_type: config.cli_type.clone(),
             cli_path: config.cli_path.clone().unwrap_or_else(|| "claude".into()),
             extra_args: config.extra_args.clone(),
         }
@@ -43,5 +45,5 @@ impl CliAdapter for ClaudeAdapter {
     }
 
     fn name(&self) -> &str { &self.name }
-    fn cli_type(&self) -> &str { "claude" }
+    fn cli_type(&self) -> &str { &self.cli_type }
 }
